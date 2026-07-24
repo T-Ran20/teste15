@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste 15 – Multas e Infrações</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #f4f7fc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px rgba(0, 20, 40, 0.12);
+            padding: 32px 30px 40px;
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #0b2a4a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .subhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e8edf5;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .subhead span {
+            background: #eef3fa;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1d4a7c;
+        }
+        .question-counter {
+            background: #dce5f0;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #10345e;
+        }
+        .question-box {
+            background: #f9faff;
+            border-radius: 28px;
+            padding: 24px 28px;
+            margin-bottom: 28px;
+            border: 1px solid #eef3fa;
+        }
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #0f2d4a;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option {
+            background: white;
+            border: 2px solid #dee7f2;
+            border-radius: 18px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1d3b5a;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .option:hover:not(.disabled-opt) {
+            background: #f0f6ff;
+            border-color: #7f9fc7;
+            transform: scale(1.01);
+        }
+        .option-letter {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #eef3fa;
+            border-radius: 40px;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 700;
+            color: #1d4a7c;
+            flex-shrink: 0;
+        }
+        .option.correct {
+            background: #d4edda;
+            border-color: #2b8c4a;
+            box-shadow: 0 0 0 2px #b7dfc9;
+        }
+        .option.correct .option-letter {
+            background: #2b8c4a;
+            color: white;
+        }
+        .option.wrong {
+            background: #f8dddd;
+            border-color: #b33c3c;
+            box-shadow: 0 0 0 2px #f1caca;
+        }
+        .option.wrong .option-letter {
+            background: #b33c3c;
+            color: white;
+        }
+        .option.disabled-opt {
+            cursor: default;
+            opacity: 0.8;
+        }
+        .feedback-area {
+            margin-top: 18px;
+            padding: 12px 16px;
+            border-radius: 24px;
+            background: #eef3fa;
+            font-weight: 500;
+            color: #153b62;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #7f9fc7;
+        }
+        .feedback-area .highlight {
+            font-weight: 700;
+            color: #0f2d4a;
+        }
+        .nav-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: white;
+            border: 2px solid #cddbe9;
+            border-radius: 50px;
+            padding: 12px 28px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1d3b5a;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .btn-primary {
+            background: #0b2a4a;
+            border-color: #0b2a4a;
+            color: white;
+            box-shadow: 0 6px 12px rgba(9, 45, 80, 0.15);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #1b3f64;
+            border-color: #1b3f64;
+            transform: scale(1.02);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border-color: #bacddb;
+        }
+        .btn-outline:hover:not(:disabled) {
+            background: #e6eefa;
+            border-color: #7f9fc7;
+        }
+        .btn-success {
+            background: #1b7e4a;
+            border-color: #1b7e4a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #2a9a5e;
+            border-color: #2a9a5e;
+        }
+        .btn-danger {
+            background: #b33c3c;
+            border-color: #b33c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c94f4f;
+            border-color: #c94f4f;
+        }
+        .btn:active:not(:disabled) {
+            transform: scale(0.97);
+        }
+        .progress {
+            margin-top: 28px;
+            background: #e2eaf3;
+            border-radius: 40px;
+            height: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #1c5c9e;
+            border-radius: 40px;
+            transition: width 0.2s ease;
+        }
+        .footer-note {
+            margin-top: 18px;
+            font-size: 0.8rem;
+            color: #5d738b;
+            text-align: center;
+            border-top: 1px solid #e8edf5;
+            padding-top: 18px;
+        }
+
+        /* ------ RESULTADO / GABARITO ------ */
+        .result-panel {
+            background: #f9fcff;
+            border-radius: 28px;
+            padding: 24px 28px;
+            border: 1px solid #dce5f0;
+            margin-top: 12px;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .result-header h2 {
+            font-size: 1.5rem;
+            color: #0b2a4a;
+        }
+        .result-stats {
+            display: flex;
+            gap: 24px;
+            background: #eef3fa;
+            padding: 8px 20px;
+            border-radius: 40px;
+        }
+        .result-stats span {
+            font-weight: 600;
+            color: #1d3b5a;
+        }
+        .result-stats .acertos { color: #1b7e4a; }
+        .result-stats .erros { color: #b33c3c; }
+        .gabarito-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+        .gabarito-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 16px;
+            border-left: 6px solid #cddbe9;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        }
+        .gabarito-item .qnum {
+            font-weight: 700;
+            color: #1d4a7c;
+            min-width: 36px;
+        }
+        .gabarito-item .resposta {
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 40px;
+            background: #eef3fa;
+        }
+        .gabarito-item .resposta.correta { background: #d4edda; color: #1b6b3a; }
+        .gabarito-item .resposta.errada { background: #f8dddd; color: #9e2b2b; }
+        .gabarito-item .dica {
+            font-size: 0.85rem;
+            color: #3d5a78;
+            background: #f0f5fd;
+            padding: 2px 14px;
+            border-radius: 40px;
+            margin-left: auto;
+        }
+        .gabarito-item .status-icon {
+            font-size: 1.2rem;
+        }
+        .result-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .mt-2 { margin-top: 12px; }
+        .mb-2 { margin-bottom: 12px; }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px 16px; }
+            .question-text { font-size: 1.1rem; }
+            .option { padding: 12px 16px; font-size: 0.95rem; }
+            .btn { padding: 10px 18px; font-size: 0.9rem; }
+            .result-stats { gap: 12px; padding: 6px 14px; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <!-- cabeçalho -->
+    <div class="subhead">
+        <h1>🚦 Teste 15</h1>
+        <span>Multas e Infrações</span>
+    </div>
+
+    <!-- modo questões -->
+    <div id="quizMode">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div class="question-counter" id="questionCounter">1 / 30</div>
+            <div style="font-size: 0.9rem; color: #2a4b6e;">clique na resposta</div>
+        </div>
+
+        <div class="question-box">
+            <div class="question-text" id="questionText">Carregando questão...</div>
+            <div class="options" id="optionsContainer"></div>
+        </div>
+
+        <div class="feedback-area" id="feedbackArea">
+            <span>✅</span> <span id="feedbackMessage">Selecione uma alternativa</span>
+        </div>
+
+        <div class="nav-area">
+            <button class="btn btn-outline" id="prevBtn" disabled>◀ Anterior</button>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-success" id="finalizarBtn">📊 Ver Gabarito</button>
+                <button class="btn btn-primary" id="nextBtn">Próxima ▶</button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 3.33%;"></div>
+        </div>
+        <div class="footer-note">
+            <span id="progressLabel">0 de 30 respondidas</span>
+        </div>
+    </div>
+
+    <!-- modo resultado / gabarito -->
+    <div id="resultMode" class="hidden">
+        <div class="result-panel">
+            <div class="result-header">
+                <h2>📋 Gabarito & Resultado</h2>
+                <div class="result-stats">
+                    <span class="acertos" id="acertosLabel">✅ 0</span>
+                    <span class="erros" id="errosLabel">❌ 0</span>
+                    <span id="porcentagemLabel">0%</span>
+                </div>
+            </div>
+            <div class="gabarito-lista" id="gabaritoLista"></div>
+
+            <div class="result-actions">
+                <button class="btn btn-outline" id="voltarQuizBtn">◀ Voltar às questões</button>
+                <button class="btn btn-danger" id="revisarErrosBtn">🔁 Revisar apenas erros</button>
+                <button class="btn btn-primary" id="reiniciarBtn">🔄 Refazer teste</button>
+            </div>
+            <div style="margin-top: 16px; font-size: 0.9rem; color: #1d4a7c; background: #e5edf8; padding: 10px 16px; border-radius: 20px;">
+                💡 <strong>Dica:</strong> As questões com <span style="background:#f8dddd; padding:0 8px; border-radius:12px;">fundo vermelho</span> indicam erros. Clique em "Revisar apenas erros" para focar nelas.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- DADOS -----
+        const GABARITO = [
+            'A','A','B','C','D','A','C','D','D','A',
+            'C','C','B','D','C','B','D','C','D','C',
+            'A','B','D','A','C','A','C','B','B','D'
+        ];
+
+        const ENUNCIADOS = [
+            "1 - Quais são os tipos de infrações:",
+            "2 - Condutor sob efeito de álcool ou outro entorpecente:",
+            "3 - Usar telefone celular resulta em:",
+            "4 - Dirigir de chinelo (calçado inseguro ou impróprio):",
+            "5 - Dirigir sem ser habilitado:",
+            "6 - Dirigir com CNH cassada ou sob suspensão de dirigir:",
+            "7 - Dirigir sem lentes, próteses ou adaptações exigidas na habilitação:",
+            "8 - Dirigir com CNH vencida há mais de 30 dias:",
+            "9 - O condutor que é habilitado para a categoria B e dirige um veículo da categoria C, está sujeito a uma:",
+            "10 - Participar de 'rachas' em vias públicas é uma infração sujeita a:",
+            "11 - Transitar na contramão em vias de sentido ÚNICO é uma infração sujeita a:",
+            "12 - Transitar na contramão em vias de sentido DUPLO é uma infração sujeita a:",
+            "13 - Transitar em declive, com o carro desengrenado é uma infração sujeita a:",
+            "14 - Transitar em calçadas, ciclovias, canteiros, gramados e jardins é uma infração sujeita a:",
+            "15 - Dar marcha ré em trechos longos ou com perigo é uma infração:",
+            "16 - Ultrapassar pela direita é uma infração:",
+            "17 - Ultrapassar pela esquerda é uma infração:",
+            "18 - Ultrapassar pelo acostamento é uma infração:",
+            "19 - Não dar passagem a veículos precedidos de batedores ou com luzes intermitentes ou sirene ligada é uma infração:",
+            "20 - Não reduzir sob chuva, neblina, cerração e condições de pouca visibilidade é uma infração:",
+            "21 - Condutor sob efeito de álcool ou outro entorpecente:",
+            "22 - Usar telefone celular resulta em:",
+            "23 - Dirigir sem ser habilitado:",
+            "24 - Dirigir com CNH cassada ou sob suspensão de dirigir:",
+            "25 - Dirigir sem lentes, próteses ou adaptações exigidas na habilitação:",
+            "26 - Participar de 'rachas' em vias públicas é uma infração sujeita a:",
+            "27 - Transitar na contramão em vias de sentido ÚNICO é uma infração sujeita a:",
+            "28 - Transitar em declive, com o carro desengrenado é uma infração sujeita a:",
+            "29 - Ultrapassar pela direita é uma infração:",
+            "30 - Ultrapassar pela esquerda é uma infração:"
+        ];
+
+        const OPCOES = [
+            ["A) leve, media, grave e gravissima", "B) leve, media e grave", "C) leve, media e gravissima", "D) leve, grave e gravissima"],
+            ["A) infração gravissima, recolhimento da CNH, retenção do veículo e suspensão do direito de dirigir", "B) infração gravissima, recolhimento da CNH e suspensão do direito de dirigir", "C) infração gravissima,retenção do veículo e suspensão do direito de dirigir", "D) infração gravissima, multa de R$ 957,70, apenas"],
+            ["A) advertência oral ou por escrito", "B) infração média, 4 pontos, R$ 85,13", "C) infração leve, 3 pontos, R$ 53,20", "D) infração grave, 5 pontos, R$ 127,69"],
+            ["A) infração média, 4 pontos, R$ 85,13 e retenção do veículo", "B) é permitido, desde que seja em zona rural", "C) infração média, 4 pontos, R$ 85,13", "D) infração grave"],
+            ["A) infração grave, multa apenas", "B) infração média, 4 pontos, R$ 85,13", "C) infração gravissima, recolhimento da CNH do condutor", "D) infração gravissima, apreensão do veículo e recolhimento da CNH do proprietário"],
+            ["A) infração gravissima, apreensão do veículo e recolhimento da CNH do proprietário", "B) infração grave, apreensão do veículo e recolhimento da CNH do proprietário", "C) infração media, apreensão do veículo e recolhimento da CNH do proprietário", "D) infração leve, apreensão do veículo e recolhimento da CNH do condutor"],
+            ["A) infração média, com multa de R$ 85,13", "B) infração grave, retensão do veículo e recolhimento da CNH do proprietário", "C) infração gravissima, retensão do veículo e recolhimento da CNH do proprietário", "D) multa apenas, infração leve"],
+            ["A) infração grave, multa de R$ 127,69", "B) infração media, retensão do veículo e recolhimento da CNH do proprietário", "C) infração gravissima, com multa apenas", "D) infração gravissima, retensão do veículo e recolhimento da CNH do proprietário"],
+            ["A) infração gravissima e recolhimento da CNH", "B) infração gravissima, retensão do veículo e recolhimento da CNH", "C) infração gravissima e retensão do veículo", "D) infração gravissima, apreensão do veículo e recolhimento da CNH"],
+            ["A) infração gravissima, 7 pontos, apreensão do veículo e recolhimento da CNH do proprietário", "B) infração grave e recolhimento da CNH", "C) infração gravissima e apreensão do veículo", "D) infração gravissima, sem adição de pontos, apreensão do veículo e recolhimento da CNH"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média, 4 pontos, R$ 85,13", "C) infração grave, 5 pontos, R$ 127,69", "D) infração gravissima, 7 pontos R$ 191,54"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média, 4 pontos, R$ 85,13", "C) infração grave, 5 pontos, R$ 127,69", "D) infração gravissima, 7 pontos R$ 191,54"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média e retenção do veículo", "C) infração grave, 5 pontos, R$ 127,69", "D) infração gravissima, 7 pontos R$ 191,54"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média e retenção do veículo", "C) infração grave, 5 pontos, R$ 127,69", "D) não é infração"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) infração gravissima, recolhimento da CNH, retenção do veículo e suspensão do direito de dirigir", "B) infração gravissima, recolhimento da CNH e suspensão do direito de dirigir", "C) infração gravissima,retenção do veículo e suspensão do direito de dirigir", "D) infração gravissima, multa de R$ 957,70, apenas"],
+            ["A) advertência oral ou por escrito", "B) infração média, 4 pontos, R$ 85,13", "C) infração leve, 3 pontos, R$ 53,20", "D) infração grave, 5 pontos, R$ 127,69"],
+            ["A) infração grave, multa apenas", "B) infração média, 4 pontos, R$ 85,13", "C) infração gravissima, recolhimento da CNH do condutor", "D) infração gravissima, apreensão do veículo e recolhimento da CNH do proprietário"],
+            ["A) infração gravissima, apreensão do veículo e recolhimento da CNH do proprietário", "B) infração grave, apreensão do veículo e recolhimento da CNH do proprietário", "C) infração media, apreensão do veículo e recolhimento da CNH do proprietário", "D) infração leve, apreensão do veículo e recolhimento da CNH do condutor"],
+            ["A) infração média, com multa de R$ 85,13", "B) infração grave, retensão do veículo e recolhimento da CNH do proprietário", "C) infração gravissima, retensão do veículo e recolhimento da CNH do proprietário", "D) multa apenas, infração leve"],
+            ["A) infração gravissima, 7 pontos, apreensão do veículo e recolhimento da CNH do proprietário", "B) infração grave e recolhimento da CNH", "C) infração gravissima e apreensão do veículo", "D) infração gravissima, sem adição de pontos, apreensão do veículo e recolhimento da CNH"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média, 4 pontos, R$ 85,13", "C) infração grave, 5 pontos, R$ 127,69", "D) infração gravissima, 7 pontos R$ 191,54"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média e retenção do veículo", "C) infração grave, 5 pontos, R$ 127,69", "D) infração gravissima, 7 pontos R$ 191,54"],
+            ["A) leve, com adição de 3 pontos no prontuário", "B) média, com adição de 4 pontos no prontuário", "C) grave, com adição de 5 pontos no prontuário", "D) gravissima, com adição de 7 pontos no prontuário"],
+            ["A) infração leve, 3 pontos, R$ 53,20", "B) infração média e retenção do veículo", "C) infração grave, 5 pontos, R$ 127,69", "D) não é infração"]
+        ];
+
+        // DICAS para cada questão (assunto)
+        const DICAS = [
+            "Infrações: leve (3pts), média (4pts), grave (5pts), gravíssima (7pts).",
+            "Álcool ou drogas: gravíssima, recolhimento CNH, retenção veículo e suspensão.",
+            "Celular ao volante: infração média, 4 pontos e multa de R$85,13.",
+            "Chinelo ou calçado impróprio: infração média, 4 pontos e multa.",
+            "Sem CNH: gravíssima, apreensão do veículo e recolhimento da CNH do proprietário.",
+            "CNH cassada/suspensa: gravíssima, apreensão do veículo e recolhimento da CNH do proprietário.",
+            "Sem adaptação exigida: gravíssima, retenção do veículo e recolhimento da CNH.",
+            "CNH vencida há +30 dias: gravíssima, retenção veículo e recolhimento CNH.",
+            "Categoria incompatível: gravíssima, apreensão do veículo e recolhimento CNH.",
+            "Racha: gravíssima, 7 pontos, apreensão do veículo e recolhimento CNH.",
+            "Contramão em via de sentido único: grave, 5 pontos, R$127,69.",
+            "Contramão em via de sentido duplo: grave, 5 pontos, R$127,69.",
+            "Declive com carro desengrenado: média e retenção do veículo.",
+            "Transitar em calçadas/ciclovias: gravíssima, 7 pontos.",
+            "Marcha ré em local perigoso: grave, 5 pontos.",
+            "Ultrapassar pela direita: média, 4 pontos.",
+            "Ultrapassar pela esquerda: NÃO é infração (desde que segura).",
+            "Ultrapassar pelo acostamento: grave, 5 pontos.",
+            "Não dar passagem a veículos de emergência: gravíssima, 7 pontos.",
+            "Não reduzir em chuva/neblina: grave, 5 pontos.",
+            "Álcool ou drogas: gravíssima, recolhimento CNH, retenção veículo e suspensão.",
+            "Celular ao volante: infração média, 4 pontos e multa de R$85,13.",
+            "Sem CNH: gravíssima, apreensão do veículo e recolhimento da CNH do proprietário.",
+            "CNH cassada/suspensa: gravíssima, apreensão do veículo e recolhimento da CNH do proprietário.",
+            "Sem adaptação exigida: gravíssima, retenção do veículo e recolhimento da CNH.",
+            "Racha: gravíssima, 7 pontos, apreensão do veículo e recolhimento CNH.",
+            "Contramão em via de sentido único: grave, 5 pontos, R$127,69.",
+            "Declive com carro desengrenado: média e retenção do veículo.",
+            "Ultrapassar pela direita: média, 4 pontos.",
+            "Ultrapassar pela esquerda: NÃO é infração (desde que segura)."
+        ];
+
+        // ----- ESTADO -----
+        let currentIndex = 0;
+        const total = GABARITO.length;
+        let respostas = new Array(total).fill(null);   // 'A','B','C','D' ou null
+        let modoRevisao = false;          // se true, só mostra erros
+        let listaRevisao = [];            // índices das questões erradas
+
+        // ----- DOM -----
+        const quizMode = document.getElementById('quizMode');
+        const resultMode = document.getElementById('resultMode');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const finalizarBtn = document.getElementById('finalizarBtn');
+        const voltarQuizBtn = document.getElementById('voltarQuizBtn');
+        const revisarErrosBtn = document.getElementById('revisarErrosBtn');
+        const reiniciarBtn = document.getElementById('reiniciarBtn');
+        const questionCounter = document.getElementById('questionCounter');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+        const acertosLabel = document.getElementById('acertosLabel');
+        const errosLabel = document.getElementById('errosLabel');
+        const porcentagemLabel = document.getElementById('porcentagemLabel');
+        const gabaritoLista = document.getElementById('gabaritoLista');
+
+        // ----- FUNÇÕES -----
+        function updateProgress() {
+            const answered = respostas.filter(r => r !== null).length;
+            const percent = total > 0 ? (answered / total) * 100 : 0;
+            progressBar.style.width = percent + '%';
+            progressLabel.textContent = `${answered} de ${total} respondidas`;
+        }
+
+        function renderQuestion(index) {
+            if (modoRevisao && listaRevisao.length > 0) {
+                // se está em modo revisão, usamos a lista de erros
+                if (index >= listaRevisao.length) {
+                    // fallback: volta pro primeiro erro
+                    index = 0;
+                    currentIndex = 0;
+                }
+                const realIndex = listaRevisao[index];
+                renderQuizQuestion(realIndex, index);
+                questionCounter.textContent = `${index+1} / ${listaRevisao.length} (revisão)`;
+                return;
+            }
+            // modo normal
+            renderQuizQuestion(index, index);
+            questionCounter.textContent = `${index+1} / ${total}`;
+        }
+
+        function renderQuizQuestion(realIndex, displayIndex) {
+            const gab = GABARITO[realIndex];
+            const respostaSelecionada = respostas[realIndex];
+            const opcoes = OPCOES[realIndex];
+
+            // texto
+            questionText.textContent = ENUNCIADOS[realIndex];
+
+            // opções
+            optionsContainer.innerHTML = '';
+            opcoes.forEach((texto, idx) => {
+                const letra = String.fromCharCode(65 + idx);
+                const div = document.createElement('div');
+                div.className = 'option';
+                if (respostaSelecionada !== null) {
+                    div.classList.add('disabled-opt');
+                    if (letra === gab) {
+                        div.classList.add('correct');
+                    } else if (letra === respostaSelecionada && respostaSelecionada !== gab) {
+                        div.classList.add('wrong');
+                    }
+                }
+                div.innerHTML = `<span class="option-letter">${letra}</span> ${texto}`;
+                div.dataset.letra = letra;
+                div.addEventListener('click', () => handleOptionClick(realIndex, letra));
+                optionsContainer.appendChild(div);
+            });
+
+            // feedback
+            if (respostaSelecionada !== null) {
+                const acertou = (respostaSelecionada === gab);
+                const emoji = acertou ? '✅' : '❌';
+                const msg = acertou ? 'Correto!' : `Resposta correta: ${gab}`;
+                feedbackMessage.innerHTML = `${emoji} ${msg}`;
+            } else {
+                feedbackMessage.innerHTML = '💡 Selecione uma alternativa';
+            }
+
+            // botoes
+            if (modoRevisao && listaRevisao.length > 0) {
+                prevBtn.disabled = (displayIndex === 0);
+                nextBtn.disabled = (displayIndex === listaRevisao.length - 1);
+            } else {
+                prevBtn.disabled = (realIndex === 0);
+                nextBtn.disabled = (realIndex === total - 1);
+            }
+
+            updateProgress();
+        }
+
+        function handleOptionClick(realIndex, letra) {
+            if (respostas[realIndex] !== null) return;
+            respostas[realIndex] = letra;
+            // re-renderiza
+            if (modoRevisao && listaRevisao.length > 0) {
+                const pos = listaRevisao.indexOf(realIndex);
+                if (pos !== -1) {
+                    renderQuestion(pos);
+                } else {
+                    // fallback: recarrega normal
+                    renderQuestion(currentIndex);
+                }
+            } else {
+                renderQuestion(currentIndex);
+            }
+        }
+
+        function goTo(index) {
+            if (modoRevisao && listaRevisao.length > 0) {
+                if (index < 0 || index >= listaRevisao.length) return;
+                currentIndex = index;
+                renderQuestion(index);
+            } else {
+                if (index < 0 || index >= total) return;
+                currentIndex = index;
+                renderQuestion(index);
+            }
+        }
+
+        // ----- GERAR GABARITO (painel de resultados) -----
+        function showResult() {
+            // estatísticas
+            let acertos = 0, erros = 0;
+            const detalhes = [];
+            for (let i = 0; i < total; i++) {
+                const resp = respostas[i];
+                const gab = GABARITO[i];
+                let status = 'nao-respondida';
+                let acertou = false;
+                if (resp !== null) {
+                    if (resp === gab) {
+                        acertos++;
+                        status = 'acertou';
+                        acertou = true;
+                    } else {
+                        erros++;
+                        status = 'errou';
+                        acertou = false;
+                    }
+                } else {
+                    status = 'nao-respondida';
+                }
+                detalhes.push({
+                    index: i,
+                    enunciado: ENUNCIADOS[i],
+                    suaResposta: resp,
+                    gabarito: gab,
+                    status: status,
+                    acertou: acertou,
+                    dica: DICAS[i] || 'Revise o assunto.'
+                });
+            }
+
+            // atualiza labels
+            acertosLabel.textContent = `✅ ${acertos}`;
+            errosLabel.textContent = `❌ ${erros}`;
+            const percent = total > 0 ? Math.round((acertos / total) * 100) : 0;
+            porcentagemLabel.textContent = `${percent}%`;
+
+            // monta lista
+            gabaritoLista.innerHTML = '';
+            detalhes.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'gabarito-item';
+
+                const icon = document.createElement('span');
+                icon.className = 'status-icon';
+                if (item.status === 'acertou') icon.textContent = '✅';
+                else if (item.status === 'errou') icon.textContent = '❌';
+                else icon.textContent = '⬜';
+
+                const qnum = document.createElement('span');
+                qnum.className = 'qnum';
+                qnum.textContent = `Q${item.index+1}`;
+
+                const respSpan = document.createElement('span');
+                respSpan.className = 'resposta';
+                if (item.suaResposta) {
+                    respSpan.textContent = `Sua: ${item.suaResposta}  |  Gab: ${item.gabarito}`;
+                    if (item.acertou) respSpan.classList.add('correta');
+                    else respSpan.classList.add('errada');
+                } else {
+                    respSpan.textContent = `Gab: ${item.gabarito} (não respondeu)`;
+                    respSpan.style.background = '#f0f0f0';
+                }
+
+                const dicaSpan = document.createElement('span');
+                dicaSpan.className = 'dica';
+                dicaSpan.textContent = `💡 ${item.dica}`;
+
+                div.appendChild(icon);
+                div.appendChild(qnum);
+                div.appendChild(respSpan);
+                div.appendChild(dicaSpan);
+                gabaritoLista.appendChild(div);
+            });
+
+            // alterna visibilidade
+            quizMode.classList.add('hidden');
+            resultMode.classList.remove('hidden');
+        }
+
+        // ----- REVISAR ERROS -----
+        function entrarModoRevisao() {
+            const errosIndices = [];
+            for (let i = 0; i < total; i++) {
+                if (respostas[i] !== null && respostas[i] !== GABARITO[i]) {
+                    errosIndices.push(i);
+                }
+            }
+            if (errosIndices.length === 0) {
+                alert('🎉 Parabéns! Você não errou nenhuma questão. Revisão não necessária.');
+                return;
+            }
+            listaRevisao = errosIndices;
+            modoRevisao = true;
+            currentIndex = 0;
+            // volta pro modo quiz
+            resultMode.classList.add('hidden');
+            quizMode.classList.remove('hidden');
+            renderQuestion(0);
+        }
+
+        // ----- REINICIAR -----
+        function reiniciarTeste() {
+            if (confirm('Deseja reiniciar o teste? Todas as respostas serão apagadas.')) {
+                respostas.fill(null);
+                modoRevisao = false;
+                listaRevisao = [];
+                currentIndex = 0;
+                resultMode.classList.add('hidden');
+                quizMode.classList.remove('hidden');
+                renderQuestion(0);
+            }
+        }
+
+        // ----- EVENTOS -----
+        prevBtn.addEventListener('click', () => {
+            if (modoRevisao && listaRevisao.length > 0) {
+                if (currentIndex > 0) goTo(currentIndex - 1);
+            } else {
+                if (currentIndex > 0) goTo(currentIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (modoRevisao && listaRevisao.length > 0) {
+                if (currentIndex < listaRevisao.length - 1) goTo(currentIndex + 1);
+            } else {
+                if (currentIndex < total - 1) goTo(currentIndex + 1);
+            }
+        });
+
+        finalizarBtn.addEventListener('click', showResult);
+
+        voltarQuizBtn.addEventListener('click', () => {
+            modoRevisao = false;
+            listaRevisao = [];
+            currentIndex = 0;
+            resultMode.classList.add('hidden');
+            quizMode.classList.remove('hidden');
+            renderQuestion(0);
+        });
+
+        revisarErrosBtn.addEventListener('click', entrarModoRevisao);
+
+        reiniciarBtn.addEventListener('click', reiniciarTeste);
+
+        // ----- INICIALIZA -----
+        renderQuestion(0);
+    })();
+</script>
+</body>
+</html>
